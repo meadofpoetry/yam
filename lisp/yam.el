@@ -23,11 +23,11 @@
                 (equal user (cdr (assoc "ImapUserName" mail-interface)))))
             objects)))
     (if thepath
-        (dbus-call-method
-         :session
-         "org.gnome.OnlineAccounts"
-         thepath
-         "org.gnome.OnlineAccounts.OAuth2Based"
-         "GetAccessToken")
+        (car (dbus-call-method
+              :session
+              "org.gnome.OnlineAccounts"
+              thepath
+              "org.gnome.OnlineAccounts.OAuth2Based"
+              "GetAccessToken"))
       (message "get-access-token-by-user failed: %s" user)
       nil)))

@@ -15,12 +15,6 @@ some IMAP server"
   (greeting nil :type string)
   (command-id nil :type integer))
 
-;; (make-imap-connection
-;;  :server "imap.gmail.com"
-;;  :port 993
-;;  :type 'ssl
-;;  :caps '("xauth"))
-
 (cl-defun imap-connect (server &optional (type 'ssl) port)
   (let* ((port (or port
                   (if (memq type '(ssl tls)) 993 143)))
@@ -72,6 +66,16 @@ some IMAP server"
        :proc proc
        :greeting greeting
        :command-id 2))))
+
+(defun imap-connection-close (conn)
+  (let ((proc (imap-connection-proc conn))
+        (buf  (imap-connection-buffer conn)))
+    (delete-process proc)
+    (kill-buffer buf)))
+
+(defun imap-connection-alive-p (conn)
+  (memq (process-status (imap-connection-proc conn))
+        '(open run)))
 
 ;; Generic commands
 
