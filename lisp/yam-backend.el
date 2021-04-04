@@ -11,8 +11,10 @@
   "Initialized connection")
 
 (defgeneric yam-backend-stop (backend)
-  "Closes the connection and does all 
-necessary cleanup.")
+  "Close the connection and do all necessary cleanup.")
+
+(defgeneric yam-backend-list-folders (backend)
+  "Return the list of mail folders for current user.")
 
 (defvar yam-config nil
   "Yam user configuration.")

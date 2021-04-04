@@ -50,3 +50,41 @@
       (cancel-timer timer)
       (imap-command-logout imap-conn)
       (imap-connection-close imap-conn))))
+
+;; TODO maybe cache
+;; TODO translate flags to keys
+(cl-defmethod yam-backend-list-folders ((conn yam-backend-imap))
+  (let ((imap-conn (yam--backend-imap-conn conn)))
+    (message "[yam] list folders")
+    ;; TODO maybe use command-lsub instead?
+    (pcase-let ((`(ok . ,list) (imap-command-list imap-conn nil "*")))
+      (let ((root (list :children nil))
+            (flat (mapcar (pcase-lambda (`(LIST ,flags ,delim ,name))
+                            (list :folder (split-string
+                                           (imap--base64-decode name)
+                                           delim)
+                                  :delim delim
+                                  :flags flags))
+                          list)))
+        ;; Collect toplevel folders first
+        (cl-sort flat (lambda (l r)
+                        (< (length (plist-get l :folder))
+                           (length (plist-get r :folder)))))
+        ;; Construct a tree, where all subfolders
+        ;; are to be found under the :children key
+        ;; of their parent folder
+        (dolist (el flat)
+          (let ((path     (plist-get el :folder))
+                (children (plist-member root :children)))
+            (while (length> path 1)
+              (let ((parent (seq-find (lambda (p)
+                                        (string= (plist-get p :folder)
+                                                 (car path)))
+                                      (plist-get children :children))))
+                (when (not (plist-member parent :children))
+                  (plist-put parent :children nil))
+                (setq children (plist-member parent :children)
+                      path (cdr path))))
+            (push (plist-put el :folder (car path))
+                  (plist-get children :children))))
+        (plist-get root :children)))))

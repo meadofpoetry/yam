@@ -331,11 +331,11 @@ BODY)")
 
 (defun test-parse ()
   (interactive)
-  (print (imap--parse-response-buffer)))
+  (print (imap--parse-response-line)))
 
 ;; Utils
 
-(define-thing-chars imap--argument "[:graph:]")
+(define-thing-chars imap--argument "[:alpha:]\|\\")
 
 (defun imap--symbol-name-p (string)
   (let ((case-fold-search nil))
@@ -384,7 +384,7 @@ BODY)")
               (with-substring start (line-end-position)
                               (push (imap--parse-response-line) tokens)
                               (setf offset (point)))
-              (forward-char offset))
+              (forward-char (1+ offset)))
           (error "Malformed list")))
        ;; Parse quoted string
        ((eq (following-char) ?\" )
