@@ -335,7 +335,7 @@ BODY)")
 
 ;; Utils
 
-(define-thing-chars imap--argument "[:alpha:]\|\\")
+(define-thing-chars imap--argument "[:alpha:]\|\\|\$")
 
 (defun imap--symbol-name-p (string)
   (let ((case-fold-search nil))
@@ -356,6 +356,8 @@ BODY)")
 (cl-defun imap--parse-response-line ()
   "TODO"
   (move-beginning-of-line 1)
+  (print (buffer-substring (line-beginning-position)
+                           (line-end-position)))
   (let (tokens
         early-exit)
     (while (not (or (eolp)
